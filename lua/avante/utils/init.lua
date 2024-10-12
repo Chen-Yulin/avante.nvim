@@ -161,20 +161,22 @@ function M.trim(str, opts)
 end
 
 function M.in_visual_mode()
-  local current_mode = vim.fn.mode()
+  local current_mode = fn.mode()
   return current_mode == "v" or current_mode == "V" or current_mode == ""
 end
 
 ---Get the selected content and range in Visual mode
 ---@return avante.SelectionResult | nil Selected content and range
 function M.get_visual_selection_and_range()
+  if not M.in_visual_mode() then return nil end
+
   local Range = require("avante.range")
   local SelectionResult = require("avante.selection_result")
 
-  if not M.in_visual_mode() then return nil end
   -- Get the start and end positions of Visual mode
-  local start_pos = vim.fn.getpos("v")
-  local end_pos = vim.fn.getpos(".")
+  local start_pos = fn.getpos("v")
+  local end_pos = fn.getpos(".")
+
   -- Get the start and end line and column numbers
   local start_line = start_pos[2]
   local start_col = start_pos[3]
@@ -190,12 +192,12 @@ function M.get_visual_selection_and_range()
   -- Check if it's a single-line selection
   if start_line == end_line then
     -- Get partial content of a single line
-    local line = vim.fn.getline(start_line)
+    local line = fn.getline(start_line)
     -- content = string.sub(line, start_col, end_col)
     content = line
   else
     -- Multi-line selection: Get all lines in the selection
-    local lines = vim.fn.getline(start_line, end_line)
+    local lines = fn.getline(start_line, end_line)
     -- Extract partial content of the first line
     -- lines[1] = string.sub(lines[1], start_col)
     -- Extract partial content of the last line
@@ -444,10 +446,16 @@ end
 
 ---@param code string
 ---@return string
-function M.get_indentation(code) return code:match("^%s*") or "" end
+function M.get_indentation(code)
+  if not code then return "" end
+  return code:match("^%s*") or ""
+end
 
 --- remove indentation from code: spaces or tabs
-function M.remove_indentation(code) return code:gsub("^%s*", "") end
+function M.remove_indentation(code)
+  if not code then return code end
+  return code:gsub("^%s*", "")
+end
 
 function M.relative_path(absolute)
   local relative = fn.fnamemodify(absolute, ":.")
